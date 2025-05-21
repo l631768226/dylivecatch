@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.dylive.mapper.DyLiveInfoMapper">
+    
+    <resultMap type="DyLiveInfo" id="DyLiveInfoResult">
+        <result property="id"    column="id"    />
+        <result property="nickname"    column="nickname"    />
+        <result property="content"    column="content"    />
+        <result property="sendtime"    column="sendtime"    />
+        <result property="anchorNickname"    column="anchor_nickname"    />
+        <result property="anchorImg"    column="anchor_img"    />
+        <result property="anchorUrl"    column="anchor_url"    />
+        <result property="dataId"    column="data_id"    />
+        <result property="liveCount"    column="live_count"    />
+        <result property="thumbsCount"    column="thumbs_count"    />
+        <result property="isManager"    column="is_manager"    />
+        <result property="dateInfo"    column="date_info"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="userLevel"    column="user_level"    />
+        <result property="isVip"    column="is_vip"    />
+    </resultMap>
+
+    <sql id="selectDyLiveInfoVo">
+        select id, nickname, content, sendtime, anchor_nickname, anchor_img, anchor_url, data_id, live_count, thumbs_count, is_manager, date_info, create_time, update_time, create_by, update_by, del_flag, user_level, is_vip from dy_live_info
+    </sql>
+
+    <select id="selectDyLiveInfoList" parameterType="DyLiveInfo" resultMap="DyLiveInfoResult">
+        <include refid="selectDyLiveInfoVo"/>
+        <where>  
+            <if test="id != null "> and id = #{id}</if>
+            <if test="nickname != null  and nickname != ''"> and nickname like concat('%', #{nickname}, '%')</if>
+            <if test="content != null  and content != ''"> and content = #{content}</if>
+            <if test="sendtime != null  and sendtime != ''"> and sendtime = #{sendtime}</if>
+            <if test="anchorNickname != null  and anchorNickname != ''"> and anchor_nickname like concat('%', #{anchorNickname}, '%')</if>
+            <if test="anchorImg != null  and anchorImg != ''"> and anchor_img = #{anchorImg}</if>
+            <if test="anchorUrl != null  and anchorUrl != ''"> and anchor_url = #{anchorUrl}</if>
+            <if test="dataId != null  and dataId != ''"> and data_id = #{dataId}</if>
+            <if test="liveCount != null "> and live_count = #{liveCount}</if>
+            <if test="thumbsCount != null "> and thumbs_count = #{thumbsCount}</if>
+            <if test="isManager != null "> and is_manager = #{isManager}</if>
+            <if test="dateInfo != null  and dateInfo != ''"> and date_info = #{dateInfo}</if>
+            <if test="createTime != null "> and create_time = #{createTime}</if>
+            <if test="delFlag != null  and delFlag != ''"> and del_flag = #{delFlag}</if>
+            <if test="userLevel != null "> and user_level = #{userLevel}</if>
+            <if test="isVip != null "> and is_vip = #{isVip}</if>
+        </where>
+    </select>
+    
+    <select id="selectDyLiveInfoById" parameterType="Integer" resultMap="DyLiveInfoResult">
+        <include refid="selectDyLiveInfoVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertDyLiveInfo" parameterType="DyLiveInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into dy_live_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="nickname != null">nickname,</if>
+            <if test="content != null">content,</if>
+            <if test="sendtime != null">sendtime,</if>
+            <if test="anchorNickname != null">anchor_nickname,</if>
+            <if test="anchorImg != null">anchor_img,</if>
+            <if test="anchorUrl != null">anchor_url,</if>
+            <if test="dataId != null">data_id,</if>
+            <if test="liveCount != null">live_count,</if>
+            <if test="thumbsCount != null">thumbs_count,</if>
+            <if test="isManager != null">is_manager,</if>
+            <if test="dateInfo != null">date_info,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="userLevel != null">user_level,</if>
+            <if test="isVip != null">is_vip,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="nickname != null">#{nickname},</if>
+            <if test="content != null">#{content},</if>
+            <if test="sendtime != null">#{sendtime},</if>
+            <if test="anchorNickname != null">#{anchorNickname},</if>
+            <if test="anchorImg != null">#{anchorImg},</if>
+            <if test="anchorUrl != null">#{anchorUrl},</if>
+            <if test="dataId != null">#{dataId},</if>
+            <if test="liveCount != null">#{liveCount},</if>
+            <if test="thumbsCount != null">#{thumbsCount},</if>
+            <if test="isManager != null">#{isManager},</if>
+            <if test="dateInfo != null">#{dateInfo},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="userLevel != null">#{userLevel},</if>
+            <if test="isVip != null">#{isVip},</if>
+         </trim>
+    </insert>
+
+    <update id="updateDyLiveInfo" parameterType="DyLiveInfo">
+        update dy_live_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="sendtime != null">sendtime = #{sendtime},</if>
+            <if test="anchorNickname != null">anchor_nickname = #{anchorNickname},</if>
+            <if test="anchorImg != null">anchor_img = #{anchorImg},</if>
+            <if test="anchorUrl != null">anchor_url = #{anchorUrl},</if>
+            <if test="dataId != null">data_id = #{dataId},</if>
+            <if test="liveCount != null">live_count = #{liveCount},</if>
+            <if test="thumbsCount != null">thumbs_count = #{thumbsCount},</if>
+            <if test="isManager != null">is_manager = #{isManager},</if>
+            <if test="dateInfo != null">date_info = #{dateInfo},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="userLevel != null">user_level = #{userLevel},</if>
+            <if test="isVip != null">is_vip = #{isVip},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDyLiveInfoById" parameterType="Integer">
+        delete from dy_live_info where id = #{id}
+    </delete>
+
+    <delete id="deleteDyLiveInfoByIds" parameterType="String">
+        delete from dy_live_info where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

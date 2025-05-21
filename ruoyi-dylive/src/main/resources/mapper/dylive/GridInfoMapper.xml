@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.dylive.mapper.GridInfoMapper">
+    
+    <resultMap type="GridInfo" id="GridInfoResult">
+        <result property="id"    column="id"    />
+        <result property="i"    column="i"    />
+        <result property="j"    column="j"    />
+        <result property="locationOneX"    column="location_one_x"    />
+        <result property="locationOneY"    column="location_one_y"    />
+        <result property="locationTwoX"    column="location_two_x"    />
+        <result property="locationTwoY"    column="location_two_y"    />
+        <result property="locationThreeX"    column="location_three_x"    />
+        <result property="locationThreeY"    column="location_three_y"    />
+        <result property="locationFourX"    column="location_four_x"    />
+        <result property="locationFourY"    column="location_four_y"    />
+        <result property="indexInfo"    column="index_info"    />
+    </resultMap>
+
+    <sql id="selectGridInfoVo">
+        select id, i, j, location_one_x, location_one_y, location_two_x, location_two_y, location_three_x, location_three_y, location_four_x, location_four_y, index_info from grid_info
+    </sql>
+
+    <select id="selectGridInfoList" parameterType="GridInfo" resultMap="GridInfoResult">
+        <include refid="selectGridInfoVo"/>
+        <where>  
+            <if test="i != null "> and i = #{i}</if>
+            <if test="j != null "> and j = #{j}</if>
+            <if test="locationOneX != null  and locationOneX != ''"> and location_one_x = #{locationOneX}</if>
+            <if test="locationOneY != null  and locationOneY != ''"> and location_one_y = #{locationOneY}</if>
+            <if test="locationTwoX != null  and locationTwoX != ''"> and location_two_x = #{locationTwoX}</if>
+            <if test="locationTwoY != null  and locationTwoY != ''"> and location_two_y = #{locationTwoY}</if>
+            <if test="locationThreeX != null  and locationThreeX != ''"> and location_three_x = #{locationThreeX}</if>
+            <if test="locationThreeY != null  and locationThreeY != ''"> and location_three_y = #{locationThreeY}</if>
+            <if test="locationFourX != null  and locationFourX != ''"> and location_four_x = #{locationFourX}</if>
+            <if test="locationFourY != null  and locationFourY != ''"> and location_four_y = #{locationFourY}</if>
+            <if test="indexInfo != null "> and index_info = #{indexInfo}</if>
+        </where>
+    </select>
+    
+    <select id="selectGridInfoById" parameterType="Long" resultMap="GridInfoResult">
+        <include refid="selectGridInfoVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertGridInfo" parameterType="GridInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into grid_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="i != null">i,</if>
+            <if test="j != null">j,</if>
+            <if test="locationOneX != null">location_one_x,</if>
+            <if test="locationOneY != null">location_one_y,</if>
+            <if test="locationTwoX != null">location_two_x,</if>
+            <if test="locationTwoY != null">location_two_y,</if>
+            <if test="locationThreeX != null">location_three_x,</if>
+            <if test="locationThreeY != null">location_three_y,</if>
+            <if test="locationFourX != null">location_four_x,</if>
+            <if test="locationFourY != null">location_four_y,</if>
+            <if test="indexInfo != null">index_info,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="i != null">#{i},</if>
+            <if test="j != null">#{j},</if>
+            <if test="locationOneX != null">#{locationOneX},</if>
+            <if test="locationOneY != null">#{locationOneY},</if>
+            <if test="locationTwoX != null">#{locationTwoX},</if>
+            <if test="locationTwoY != null">#{locationTwoY},</if>
+            <if test="locationThreeX != null">#{locationThreeX},</if>
+            <if test="locationThreeY != null">#{locationThreeY},</if>
+            <if test="locationFourX != null">#{locationFourX},</if>
+            <if test="locationFourY != null">#{locationFourY},</if>
+            <if test="indexInfo != null">#{indexInfo},</if>
+         </trim>
+    </insert>
+
+    <update id="updateGridInfo" parameterType="GridInfo">
+        update grid_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="i != null">i = #{i},</if>
+            <if test="j != null">j = #{j},</if>
+            <if test="locationOneX != null">location_one_x = #{locationOneX},</if>
+            <if test="locationOneY != null">location_one_y = #{locationOneY},</if>
+            <if test="locationTwoX != null">location_two_x = #{locationTwoX},</if>
+            <if test="locationTwoY != null">location_two_y = #{locationTwoY},</if>
+            <if test="locationThreeX != null">location_three_x = #{locationThreeX},</if>
+            <if test="locationThreeY != null">location_three_y = #{locationThreeY},</if>
+            <if test="locationFourX != null">location_four_x = #{locationFourX},</if>
+            <if test="locationFourY != null">location_four_y = #{locationFourY},</if>
+            <if test="indexInfo != null">index_info = #{indexInfo},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteGridInfoById" parameterType="Long">
+        delete from grid_info where id = #{id}
+    </delete>
+
+    <delete id="deleteGridInfoByIds" parameterType="String">
+        delete from grid_info where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
