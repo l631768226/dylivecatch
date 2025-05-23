@@ -111,4 +111,13 @@ public class GridInfoController extends BaseController
     public AjaxResult initData() throws IOException {
         return gridInfoService.initData();
     }
+
+    /**
+     * 数据初始化
+     * @return
+     */
+    @PostMapping("/initLeakData")
+    public AjaxResult initLeakData() throws IOException {
+        return gridInfoService.initLeakData();
+    }
 }

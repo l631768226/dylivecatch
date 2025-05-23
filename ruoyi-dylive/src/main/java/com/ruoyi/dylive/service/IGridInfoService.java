@@ -67,4 +67,11 @@ public interface IGridInfoService
      * @return
      */
     AjaxResult initData() throws IOException;
+
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
+    AjaxResult initLeakData() throws IOException;
 }

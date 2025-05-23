@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +13,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.dylive.domain.PollutionLeakTimeInfo;
 import com.ruoyi.dylive.domain.PollutionTimeInfo;
+import com.ruoyi.dylive.mapper.PollutionLeakTimeInfoMapper;
 import com.ruoyi.dylive.mapper.PollutionTimeInfoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,9 @@ public class GridInfoServiceImpl implements IGridInfoService
 
     @Autowired
     private PollutionTimeInfoMapper pollutionTimeInfoMapper;
+
+    @Autowired
+    private PollutionLeakTimeInfoMapper pollutionLeakTimeInfoMapper;
 
     /**
      * 查询网格信息
@@ -239,6 +245,138 @@ public class GridInfoServiceImpl implements IGridInfoService
         return AjaxResult.error();
     }
 
+    @Override
+    public AjaxResult initLeakData() throws IOException {
+        List<GridInfo> gridInfoList = gridInfoMapper.selectGridInfoList(null);
+        if (gridInfoList != null && !gridInfoList.isEmpty()) {
+            //网格序号+对应的网格信息 组成map
+            Map<Long, GridInfo> gridInfoMap = new HashMap<Long, GridInfo>();
+            //根据list构建map
+            gridInfoMap = gridInfoList.stream().collect(Collectors.toMap(
+                    GridInfo:: getIndexInfo,
+                    gridInfo -> gridInfo,
+                    (oldValue, newValue) -> newValue
+            ));
+
+            String basePath = "C:\\Users\\LY\\PycharmProjects\\ins_test";
+
+            String doFilePath = basePath + "\\wc_do.txt";
+            String tnFilePath = basePath + "\\wc_tn.txt";
+            String tpFilePath = basePath + "\\wc_tp.txt";
+            String moFilePath = basePath + "\\wc_mo.txt";
+            String nhFilePath = basePath + "\\wc_nh.txt";
+
+            //共1天 24小时 5分钟为一个周期 共288个周期
+            int dateCount = 288;
+            //89个网格
+            int gridCount = 89;
+            //目标数据的次序(天数标志到第一条目标数据的间隔)
+            int dataOrder = 2;
+            //目标数据的种类（同一天不同网格的同一种数据的间隔）
+            int dataTypeCount = 2;
+            //第0天对应的日期和时间
+            String timeStartStr = "2025-06-01 00:00";
+            //数据光标指向初始位置（第0天标志之前）
+            int lineIndex = 20;
+            List<PollutionLeakTimeInfo> dataInfoList = new ArrayList<PollutionLeakTimeInfo>();
+
+            for(int i = 0; i <= dateCount; i++) {
+                //自第0个周期开始 到目标周期
+                //计算第N个周期的日期时间字符串表达式
+                int addMinute = i * 5;
+                String dateTimeStr = calculateMinutesLater(timeStartStr, (long) addMinute);
+                //第一次进入时 光标调整到第0天的标志位置
+                //网格的循环结束时，光标指向第N天最后一个网格的目标数据位置，将光标调整到第N+1天的位置
+                //调整公式为 数据种类数（相邻网格同一种物质数据的间隔数 - 该种物质的顺序数（第几种物质） + 1）
+                lineIndex += (dataTypeCount - dataOrder + 1);
+                //记录是否第一次进入下面的循环
+                int tag = 0;
+                for(int j = 1; j <= gridCount; j++) {
+                    //自第1个网格开始，到最后一个网格
+
+                    PollutionLeakTimeInfo dataInfo = new PollutionLeakTimeInfo();
+
+                    //获取网格编号
+                    Long indexL = (long) j;
+                    //获取网格信息
+                    GridInfo gridInfo = gridInfoMap.get(indexL);
+
+                    if(gridInfo != null) {
+                        //每次进入该循环时，在操作之前，光标在第N天的标记数据位置
+                        //光标移到当前数据网格的目标数据，需要+次序数据
+                        if(tag == 0) {
+                            lineIndex += dataOrder;
+                        }else {
+                            //第二次循环开始，每次需要将光标调整到下一条目标数据，应该+数据种类数（同一天不同网格同一个数据的间隔）
+                            lineIndex += dataTypeCount;
+                        }
+
+                        //记录日期
+                        dataInfo.setTimeInfo(dateTimeStr);
+                        //记录EFDC中横纵坐标
+                        dataInfo.setI(gridInfo.getI());
+                        dataInfo.setJ(gridInfo.getJ());
+                        //记录网格坐标数据
+                        dataInfo.setLocationOneX(gridInfo.getLocationOneX());
+                        dataInfo.setLocationOneY(gridInfo.getLocationOneY());
+                        dataInfo.setLocationTwoX(gridInfo.getLocationTwoX());
+                        dataInfo.setLocationTwoY(gridInfo.getLocationTwoY());
+                        dataInfo.setLocationThreeX(gridInfo.getLocationThreeX());
+                        dataInfo.setLocationThreeY(gridInfo.getLocationThreeY());
+                        dataInfo.setLocationFourX(gridInfo.getLocationFourX());
+                        dataInfo.setLocationFourY(gridInfo.getLocationFourY());
+                        //记录第几个周期
+                        dataInfo.setTimeIndex((long)i);
+                        //记录第几个网格
+                        dataInfo.setIndexInfo((long)j);
+
+                        //溶解氧数据
+                        String doxy = getLineFromFile(doFilePath, lineIndex);
+                        //总氮
+                        String tn = getLineFromFile(tnFilePath, lineIndex);
+                        //总磷
+                        String tp = getLineFromFile(tpFilePath, lineIndex);
+                        //高锰酸盐
+                        String mo = getLineFromFile(moFilePath, lineIndex);
+                        //氨氮
+                        String nh = getLineFromFile(nhFilePath, lineIndex);
+
+                        dataInfo.setDoxy(doxy);
+                        dataInfo.setTn(tn);
+                        dataInfo.setTp(tp);
+                        dataInfo.setMo(mo);
+                        dataInfo.setNh(nh);
+
+                        dataInfoList.add(dataInfo);
+
+                        //最终记录与网格数相同
+                        tag += 1;
+                    }else{
+                        break;
+                    }
+                }
+            }
+
+            //循环结束，数据准备完毕
+            if (dataInfoList.isEmpty()){
+                return AjaxResult.error();
+            }else{
+                //数量应该为 89 * （288 + 1）条数据
+                System.out.println(dataInfoList.size());
+                //批量插入之前 按每1000条数据划分list
+                List<List<PollutionLeakTimeInfo>> batches = splitList(dataInfoList, 1000);
+                if (!batches.isEmpty()) {
+                    for (List<PollutionLeakTimeInfo> batch : batches) {
+                        //划分完毕 批量插入
+                        pollutionLeakTimeInfoMapper.batchInsert(batch);
+                    }
+                }
+                return AjaxResult.success();
+            }
+        }
+        return AjaxResult.error();
+    }
+
     /**
      * 读取文件某一指定行的数据
      * @param filePath 文件路径
@@ -283,6 +421,26 @@ public class GridInfoServiceImpl implements IGridInfoService
 
         // 格式化为字符串并返回
         return futureDate.format(formatter);
+    }
+
+    /**
+     * 计算指定日期时间之后若干分钟的新日期时间
+     * @param dateTimeStr 输入的日期时间字符串，格式为"yyyy-MM-dd HH:mm"
+     * @param minutesToAdd 需要添加的分钟数
+     * @return 计算后的新日期时间字符串，格式保持为"yyyy-MM-dd HH:mm"
+     */
+    public static String calculateMinutesLater(String dateTimeStr, long minutesToAdd) {
+
+        // 定义日期格式
+        DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        // 解析输入的日期时间字符串
+        LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr, FORMATTER);
+
+        // 计算若干分钟之后的日期时间
+        LocalDateTime newDateTime = dateTime.plusMinutes(minutesToAdd);
+
+        // 格式化为相同的字符串格式
+        return newDateTime.format(FORMATTER);
     }
 
     /**
