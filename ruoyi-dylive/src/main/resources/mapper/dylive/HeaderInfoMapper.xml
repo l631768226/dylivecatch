@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.dylive.mapper.HeaderInfoMapper">
+    
+    <resultMap type="HeaderInfo" id="HeaderInfoResult">
+        <result property="id"    column="id"    />
+        <result property="keyInfo"    column="key_info"    />
+        <result property="valueInfo"    column="value_info"    />
+    </resultMap>
+
+    <sql id="selectHeaderInfoVo">
+        select id, key_info, value_info from header_info
+    </sql>
+
+    <select id="selectHeaderInfoList" parameterType="HeaderInfo" resultMap="HeaderInfoResult">
+        <include refid="selectHeaderInfoVo"/>
+        <where>  
+            <if test="keyInfo != null  and keyInfo != ''"> and key_info = #{keyInfo}</if>
+            <if test="valueInfo != null  and valueInfo != ''"> and value_info = #{valueInfo}</if>
+        </where>
+    </select>
+    
+    <select id="selectHeaderInfoById" parameterType="Long" resultMap="HeaderInfoResult">
+        <include refid="selectHeaderInfoVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertHeaderInfo" parameterType="HeaderInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into header_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="keyInfo != null and keyInfo != ''">key_info,</if>
+            <if test="valueInfo != null">value_info,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="keyInfo != null and keyInfo != ''">#{keyInfo},</if>
+            <if test="valueInfo != null">#{valueInfo},</if>
+         </trim>
+    </insert>
+
+    <update id="updateHeaderInfo" parameterType="HeaderInfo">
+        update header_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="keyInfo != null and keyInfo != ''">key_info = #{keyInfo},</if>
+            <if test="valueInfo != null">value_info = #{valueInfo},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteHeaderInfoById" parameterType="Long">
+        delete from header_info where id = #{id}
+    </delete>
+
+    <delete id="deleteHeaderInfoByIds" parameterType="String">
+        delete from header_info where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

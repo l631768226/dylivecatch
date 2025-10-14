@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.dylive.mapper.RequestHistoryMapper">
+    
+    <resultMap type="RequestHistory" id="RequestHistoryResult">
+        <result property="id"    column="id"    />
+        <result property="url"    column="url"    />
+        <result property="requestInfo"    column="request_info"    />
+        <result property="userId"    column="user_id"    />
+        <result property="requestDate"    column="request_date"    />
+        <result property="requestMethod"    column="request_method"    />
+    </resultMap>
+
+    <sql id="selectRequestHistoryVo">
+        select id, url, request_info, user_id, request_date, request_method from request_history
+    </sql>
+
+    <select id="selectRequestHistoryList" parameterType="RequestHistory" resultMap="RequestHistoryResult">
+        <include refid="selectRequestHistoryVo"/>
+        <where>  
+            <if test="url != null  and url != ''"> and url = #{url}</if>
+            <if test="requestInfo != null  and requestInfo != ''"> and request_info = #{requestInfo}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="requestDate != null "> and request_date = #{requestDate}</if>
+            <if test="requestMethod != null  and requestMethod != ''"> and request_method = #{requestMethod}</if>
+        </where>
+    </select>
+    
+    <select id="selectRequestHistoryById" parameterType="Integer" resultMap="RequestHistoryResult">
+        <include refid="selectRequestHistoryVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertRequestHistory" parameterType="RequestHistory" useGeneratedKeys="true" keyProperty="id">
+        insert into request_history
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="url != null">url,</if>
+            <if test="requestInfo != null">request_info,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="requestDate != null">request_date,</if>
+            <if test="requestMethod != null">request_method,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="url != null">#{url},</if>
+            <if test="requestInfo != null">#{requestInfo},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="requestDate != null">#{requestDate},</if>
+            <if test="requestMethod != null">#{requestMethod},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRequestHistory" parameterType="RequestHistory">
+        update request_history
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="url != null">url = #{url},</if>
+            <if test="requestInfo != null">request_info = #{requestInfo},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="requestDate != null">request_date = #{requestDate},</if>
+            <if test="requestMethod != null">request_method = #{requestMethod},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteRequestHistoryById" parameterType="Integer">
+        delete from request_history where id = #{id}
+    </delete>
+
+    <delete id="deleteRequestHistoryByIds" parameterType="String">
+        delete from request_history where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
