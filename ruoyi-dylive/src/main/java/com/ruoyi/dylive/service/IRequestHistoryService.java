@@ -1,7 +1,10 @@
 package com.ruoyi.dylive.service;
 
 import java.util.List;
+
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.dylive.domain.RequestHistory;
+import com.ruoyi.dylive.model.RequestSendRec;
 
 /**
  * 请求历史信息Service接口
@@ -58,4 +61,11 @@ public interface IRequestHistoryService
      * @return 结果
      */
     public int deleteRequestHistoryById(Integer id);
+
+    /**
+     * API调用接口
+     * @param data 请求信息
+     * @return 结果信息
+     */
+    AjaxResult send(RequestSendRec data) throws Exception;
 }

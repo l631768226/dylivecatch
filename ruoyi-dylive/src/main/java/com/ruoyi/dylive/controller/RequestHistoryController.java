@@ -2,6 +2,8 @@ package com.ruoyi.dylive.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.dylive.model.RequestSendRec;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -102,5 +104,13 @@ public class RequestHistoryController extends BaseController
         return toAjax(requestHistoryService.deleteRequestHistoryByIds(ids));
     }
 
-
+    /**
+     * API调用接口
+     * @param data 请求信息
+     * @return 结果信息
+     */
+    @PostMapping("/send")
+    public AjaxResult send(@RequestBody RequestSendRec data){
+        return requestHistoryService.send(data);
+    }
 }
