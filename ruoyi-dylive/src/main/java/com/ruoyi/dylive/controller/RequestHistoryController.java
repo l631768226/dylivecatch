@@ -110,7 +110,7 @@ public class RequestHistoryController extends BaseController
      * @return 结果信息
      */
     @PostMapping("/send")
-    public AjaxResult send(@RequestBody RequestSendRec data){
+    public AjaxResult send(@RequestBody RequestSendRec data) throws Exception {
         return requestHistoryService.send(data);
     }
 }
