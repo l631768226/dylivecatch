@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.dylive.domain.HeaderInfo;
 import com.ruoyi.dylive.model.*;
 import com.ruoyi.dylive.utils.CommenMethod;
 import org.apache.commons.lang.StringUtils;
@@ -28,8 +29,6 @@ public class RequestHistoryServiceImpl implements IRequestHistoryService
 {
     @Autowired
     private RequestHistoryMapper requestHistoryMapper;
-
-    private Gson gson = new Gson();
 
     /**
      * 查询请求历史信息
@@ -127,15 +126,37 @@ public class RequestHistoryServiceImpl implements IRequestHistoryService
         if (headerModels == null || headerModels.isEmpty()){
             return AjaxResult.error("请求头信息不能缺失");
         }
+
+        //将请求头转换成Map格式
+        Map<String, String> headerMap = headerModels.stream()
+                // 过滤 keyInfo 为 null 的元素（避免Map的key为null）
+                .filter(header -> header.getKeyInfo() != null)
+                .collect(Collectors.toMap(
+                        HeaderModel::getKeyInfo,  // 键：HeaderModel的keyInfo
+                        HeaderModel::getValueInfo, // 值：HeaderModel的valueInfo
+                        (oldValue, newValue) -> newValue // 若key重复，保留新值（覆盖旧值）
+                ));
+
         //获取请求体
         BodyInfo boyInfo = requestInfo.getBody();
-        Map<String, String> formMap = new HashMap<String, String>();
+        List<FormData> formDataList = new ArrayList<>();
+
+        //请求头map
+        Map<String, String> headMap = headerModels.stream()
+                .filter(headerModle -> headerModle.getKeyInfo() != null) // 过滤key为null的元素
+                .collect(Collectors.toMap(
+                        HeaderModel::getKeyInfo,    // 键：HeaderModel的key
+                        HeaderModel::getValueInfo,  // 值：HeaderModel的value
+                        (oldValue, newValue) -> newValue // 重复key时保留新值
+                ));
+        //非表单格式的请求内容
         String content = "";
         if (boyInfo != null){
             String type = boyInfo.getTypeName();
             if (StringUtils.isBlank(type)){
                 return AjaxResult.error("请求类型不能为空");
             }
+            String contentTypeStr = "";
             switch (type){
                 case "none":
                     //无传参
@@ -144,29 +165,49 @@ public class RequestHistoryServiceImpl implements IRequestHistoryService
                     //字符串
                     RawData rawData = boyInfo.getRaw();
                     if (rawData != null){
+                        String rawDataType = rawData.getType();
+                        if (StringUtils.isNotBlank(rawDataType)){
+                            switch (rawDataType){
+                                case "JSON":
+                                    contentTypeStr = "application/json";
+                                    break;
+                                case "XML":
+                                    contentTypeStr = "application/xml";
+                                    break;
+                                case "Text":
+                                    contentTypeStr = "text/plain";
+                                    break;
+                                case "JavaScript":
+                                    contentTypeStr = "application/javascript";
+                                    break;
+                                case "HTML":
+                                    contentTypeStr = "text/html";
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
                         content = rawData.getInfo();
                     }
                     break;
                 case "form-data":
-                case "x-www-form-urlencoded":
                     //form表单
-                    List<FormData> formDataList = boyInfo.getFormData();
-                    if (formDataList != null && !formDataList.isEmpty()){
-                        formMap = formDataList.stream()
-                                .filter(formData -> formData.getKey() != null) // 过滤key为null的元素
-                                .collect(Collectors.toMap(
-                                        FormData::getKey,    // 键：FormData的key
-                                        FormData::getValue,  // 值：FormData的value
-                                        (oldValue, newValue) -> newValue // 重复key时保留新值
-                                ));
-                    }
+                    formDataList = boyInfo.getFormData();
+                    contentTypeStr = "multipart/form-data";
+                    break;
+                case "x-www-form-urlencoded":
+                    formDataList = boyInfo.getFormData();
+                    contentTypeStr = "application/x-www-form-urlencoded";
                     break;
                 default:
                     break;
             }
+            if (StringUtils.isNotBlank(contentTypeStr)){
+                headMap.put("Content-Type", contentTypeStr);
+            }
         }
-
-        RequestResult result = CommenMethod.sendRequest(url, headerModels, method, formMap, content);
+        //调用请求方法 获取结果
+        RequestResult result = CommenMethod.sendRequest(url, headerMap, method, formDataList, content);
         String resultStr = "";
         int code = result.getCode();
         if (code == 200){
@@ -177,8 +218,8 @@ public class RequestHistoryServiceImpl implements IRequestHistoryService
             resultStr = result.getMsg();
         }
 
-        //请求内容字符串（用于保存）
-        String requestStr = gson.toJson(requestInfo);
+//        //请求内容字符串（用于保存）
+//        String requestStr = gson.toJson(requestInfo);
 
         return AjaxResult.success(resultStr);
     }

@@ -13,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -25,13 +26,13 @@ public class CommenMethod {
      * @param url 请求地址
      * @param headers 请求头信息
      * @param requestMethod 请求方法
-     * @param formMap Form表单请求内容
+     * @param formDataList Form表单请求内容
      * @param content 其他请求体请求内容
      * @return 请求结果信息
      * @throws Exception 异常信息
      */
-    public static RequestResult sendRequest(String url, List<HeaderModel> headers,
-                                            String requestMethod, Map<String, String> formMap, String content) throws Exception {
+    public static RequestResult sendRequest(String url, Map<String, String> headers,
+                                            String requestMethod, List<FormData> formDataList, String content) throws Exception {
         //url转换
         URL mUrl = new URL(url);
         HttpURLConnection mHttpURLConnection = (HttpURLConnection) mUrl.openConnection();
@@ -43,9 +44,12 @@ public class CommenMethod {
         mHttpURLConnection.setRequestMethod(requestMethod);
 
         //设置请求头
-        for (HeaderModel header : headers){
-            mHttpURLConnection.setRequestProperty(header.getKeyInfo(), header.getValueInfo());
-        }
+        headers.entrySet().stream()
+                .forEach(entry -> {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            mHttpURLConnection.setRequestProperty(key, value);
+        });
 
         //接收输入流
         mHttpURLConnection.setDoInput(true);
@@ -58,30 +62,29 @@ public class CommenMethod {
         mHttpURLConnection.connect();
 
         //处理form表单请求体
-        if (formMap != null && !formMap.isEmpty()){
-            String postContent = formMap.entrySet().stream()
-                    // 过滤空键或空字符串键（避免无效参数）
-                    .filter(entry -> entry.getKey() != null && !entry.getKey().trim().isEmpty())
-                    // 映射为 "encodedKey=encodedValue" 字符串
-                    .map(entry -> {
-                        try {
-                            String key = entry.getKey();
-                            String value = entry.getValue();
-                            // 编码 key（强制 UTF-8）
-                            String encodedKey = URLEncoder.encode(key, StandardCharsets.UTF_8.name());
-                            // 编码 value（null 转为空字符串）
-                            String encodedValue = (value != null)
-                                    ? URLEncoder.encode(value, StandardCharsets.UTF_8.name())
-                                    : "";
-                            return encodedKey + "=" + encodedValue;
-                        } catch (UnsupportedEncodingException e) {
-                            // UTF-8 是标准编码，理论上不会抛异常，此处转为运行时异常
-                            throw new RuntimeException("URL 编码失败", e);
-                        }
-                    })
-                    // 用 & 符号拼接所有键值对
-                    .collect(Collectors.joining("&"));
+        if (formDataList != null && !formDataList.isEmpty()){
+            List<String> formInfoList = new ArrayList<>();
+            String postContent = "";
+            for (FormData formData : formDataList){
+                String key = formData.getKey();
+                String value = formData.getValue();
+                String type = formData.getType();
+                if (StringUtils.isEmpty(key) || StringUtils.isEmpty(value)){
+                    continue;
+                }
+                if (StringUtils.isNotEmpty(type)){
+                    //form表单格式，可能有文件
+                    if("File".equals(type)){
+                        //文件格式
+                        //文件单独处理
+                    }
+                }
+                //普通form表单
+                String fromInfoStr = key + "=" + value;
 
+                formInfoList.add(fromInfoStr);
+            }
+            postContent = String.join("&", formInfoList);
             DataOutputStream dos = new DataOutputStream(mHttpURLConnection.getOutputStream());
             dos.write(postContent.getBytes(StandardCharsets.UTF_8));
             dos.flush();
