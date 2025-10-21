@@ -2,6 +2,7 @@ package com.ruoyi.dylive.mapper;
 
 import java.util.List;
 import com.ruoyi.dylive.domain.HeaderInfo;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 请求头信息Mapper接口
@@ -58,4 +59,10 @@ public interface HeaderInfoMapper
      * @return 结果
      */
     public int deleteHeaderInfoByIds(Long[] ids);
+
+    /**
+     * 查询所有header的值不为空的数据
+     * @return 请求头信息列表
+     */
+    List<HeaderInfo> findHeadInfoList();
 }

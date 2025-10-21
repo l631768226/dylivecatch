@@ -101,4 +101,13 @@ public class HeaderInfoController extends BaseController
     {
         return toAjax(headerInfoService.deleteHeaderInfoByIds(ids));
     }
+
+    /**
+     * 获取带有默认值的head信息
+     * @return head信息列表
+     */
+    @PostMapping("/headList")
+    public AjaxResult headList(){
+        return headerInfoService.headList();
+    }
 }

@@ -11,7 +11,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * @author ruoyi
  * @date 2025-10-14
  */
-public class HeaderInfo extends BaseEntity
+public class HeaderInfo //extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 

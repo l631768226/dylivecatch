@@ -1,6 +1,8 @@
 package com.ruoyi.dylive.service;
 
 import java.util.List;
+
+import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.dylive.domain.HeaderInfo;
 
 /**
@@ -58,4 +60,10 @@ public interface IHeaderInfoService
      * @return 结果
      */
     public int deleteHeaderInfoById(Long id);
+
+    /**
+     * 获取带有默认值的head信息
+     * @return head信息列表
+     */
+    AjaxResult headList();
 }

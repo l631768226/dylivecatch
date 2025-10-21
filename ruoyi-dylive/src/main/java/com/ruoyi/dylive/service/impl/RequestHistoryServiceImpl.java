@@ -1,13 +1,12 @@
 package com.ruoyi.dylive.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.gson.Gson;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.model.LoginUser;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.dylive.domain.HeaderInfo;
 import com.ruoyi.dylive.model.*;
 import com.ruoyi.dylive.utils.CommenMethod;
@@ -127,6 +126,7 @@ public class RequestHistoryServiceImpl implements IRequestHistoryService
             return AjaxResult.error("请求头信息不能缺失");
         }
 
+        Date date = new Date();
         //将请求头转换成Map格式
         Map<String, String> headerMap = headerModels.stream()
                 // 过滤 keyInfo 为 null 的元素（避免Map的key为null）
@@ -218,9 +218,21 @@ public class RequestHistoryServiceImpl implements IRequestHistoryService
             resultStr = result.getMsg();
         }
 
-//        //请求内容字符串（用于保存）
-//        String requestStr = gson.toJson(requestInfo);
-
+        Gson gson = new Gson();
+        //请求内容字符串（用于保存）
+        RequestHistory requestHistory = new RequestHistory();
+        String requestStr = gson.toJson(requestInfo);
+        requestHistory.setRequestInfo(requestStr);
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        if (loginUser != null){
+            Long userId = loginUser.getUser().getUserId();
+            requestHistory.setUserId(userId);
+        }
+        requestHistory.setUrl(url);
+        requestHistory.setRequestMethod(method);
+        requestHistory.setRequestDate(date);
+        //请求信息存入数据库
+        requestHistoryMapper.insertRequestHistory(requestHistory);
         return AjaxResult.success(resultStr);
     }
 }

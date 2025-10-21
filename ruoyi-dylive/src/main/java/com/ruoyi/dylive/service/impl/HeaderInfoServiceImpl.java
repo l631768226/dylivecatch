@@ -1,6 +1,8 @@
 package com.ruoyi.dylive.service.impl;
 
 import java.util.List;
+
+import com.ruoyi.common.core.domain.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.dylive.mapper.HeaderInfoMapper;
@@ -89,5 +91,15 @@ public class HeaderInfoServiceImpl implements IHeaderInfoService
     public int deleteHeaderInfoById(Long id)
     {
         return headerInfoMapper.deleteHeaderInfoById(id);
+    }
+
+    /**
+     * 获取带有默认值的head信息
+     * @return head信息列表
+     */
+    @Override
+    public AjaxResult headList() {
+        List<HeaderInfo> headerInfos = headerInfoMapper.findHeadInfoList();
+        return AjaxResult.success(headerInfos);
     }
 }

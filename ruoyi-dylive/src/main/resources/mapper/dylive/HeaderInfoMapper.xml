@@ -58,4 +58,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
+    <select id="findHeadInfoList" resultMap="HeaderInfoResult">
+        select * from header_info where value_info is not null order by key_info asc
+    </select>
 </mapper>
