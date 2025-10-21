@@ -2,22 +2,17 @@ package com.ruoyi.dylive.utils;
 
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.dylive.model.FormData;
-import com.ruoyi.dylive.model.HeaderModel;
 import com.ruoyi.dylive.model.RequestResult;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
 
 public class CommenMethod {
 
@@ -44,12 +39,7 @@ public class CommenMethod {
         mHttpURLConnection.setRequestMethod(requestMethod);
 
         //设置请求头
-        headers.entrySet().stream()
-                .forEach(entry -> {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            mHttpURLConnection.setRequestProperty(key, value);
-        });
+        headers.forEach(mHttpURLConnection::setRequestProperty);
 
         //接收输入流
         mHttpURLConnection.setDoInput(true);
@@ -64,7 +54,7 @@ public class CommenMethod {
         //处理form表单请求体
         if (formDataList != null && !formDataList.isEmpty()){
             List<String> formInfoList = new ArrayList<>();
-            String postContent = "";
+            String postContent;
             for (FormData formData : formDataList){
                 String key = formData.getKey();
                 String value = formData.getValue();
@@ -77,6 +67,7 @@ public class CommenMethod {
                     if("File".equals(type)){
                         //文件格式
                         //文件单独处理
+
                     }
                 }
                 //普通form表单
@@ -205,7 +196,7 @@ public class CommenMethod {
                 // 定义读取的长度
                 int len = 0;
                 // 定义缓冲区
-                byte buffer[] = new byte[1024];
+                byte[] buffer = new byte[1024];
                 // 按照缓冲区的大小，循环读取
                 while ((len = is.read(buffer)) != -1) {
                     // 根据读取的长度写入到os对象中
